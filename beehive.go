@@ -58,3 +58,7 @@ func Reboot() {
 func Free() {
 	defaultInstance.Free()
 }
+
+func Load() {
+	defaultInstance.Load()
+}

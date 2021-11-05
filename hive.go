@@ -86,7 +86,6 @@ func NewBeehive(size int, options ...Option) *Beehive {
 	beehive.cond = sync.NewCond(beehive.lock)
 
 	go beehive.purgePeriodically()
-	go beehive.load()
 	go beehive.pickHoney()
 
 	return beehive
@@ -120,7 +119,6 @@ func (b *Beehive) Release() {
 	b.lock.Lock()
 
 	b.bees.reset()
-	close(b.bucket)
 
 	b.lock.Unlock()
 	b.cond.Broadcast()
@@ -148,10 +146,8 @@ func (b *Beehive) Running() int {
 
 func (b *Beehive) Reboot() {
 	if atomic.CompareAndSwapInt32(&b.state, CLOSED, OPEND) {
-		b.bucket = b.newBucket()
-
 		go b.purgePeriodically()
-		go b.load()
+		go b.Load()
 		go b.pickHoney()
 	}
 }
@@ -345,10 +341,20 @@ func (b *Beehive) newBucket() (bucket chan *Event) {
 
 func (b *Beehive) dump() {
 	messages := []*Event{}
-	for message := range b.bucket {
-		messages = append(messages, message)
+	for {
+		t := time.After(time.Millisecond)
+		select {
+		case <-t:
+			goto write
+		case message, ok := <-b.bucket:
+			if !ok {
+				goto write
+			}
+			messages = append(messages, message)
+		}
 	}
 
+write:
 	dump, err := json.Marshal(messages)
 	if err != nil {
 		b.opts.Logger.Printf("dump data fail:%v.", err)
@@ -361,7 +367,7 @@ func (b *Beehive) dump() {
 	}
 }
 
-func (b *Beehive) load() {
+func (b *Beehive) Load() {
 	if len(b.opts.DumpFile) == 0 || b.opts.DumpFile == "" {
 		return
 	}
