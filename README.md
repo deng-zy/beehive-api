@@ -1,8 +1,9 @@
 # beehive
----
-## Thanks
 
 thanks https://github1s.com/panjf2000/ants
+
+## Description
+Go event system
 
 ## Installl
 
@@ -16,29 +17,32 @@ go get github.com/gordon-zhiyong/beehive
 package main
 
 import (
-    "fmt"
+	"fmt"
+	"time"
 
-    "github.com/gordon-zhiyong/beehive"
+	"github.com/gordon-zhiyong/beehive"
 )
 
 func task(event *beehive.Event) error {
-    fmt.Println("task say topic:", event.Topic, "data:", event.Data)
+	fmt.Println("task say topic:", event.Topic, "data:", event.Data)
+	return nil
 }
 
 func taskTwo(event *beehive.Event) error {
-    fmt.Println("taskTwo say topic:", event.Topic, "data:", event.Data)
+	fmt.Println("taskTwo say topic:", event.Topic, "data:", event.Data)
+	return nil
 }
 
 func main() {
-    beehive.Subscribe("demoEvent", task)
-    beehive.Subscribe("muliListenerEvent", task, taskTwo)
+	beehive.Subscribe("demoEvent", task)
+	beehive.Subscribe("muliListenerEvent", task, taskTwo)
 
-    beehive.Publish("demoEvent")
-    beehive.Publish("muliListenerEvent")
+	beehive.Publish("demoEvent", "hello")
+	beehive.Publish("muliListenerEvent", "im event data")
 
-    time.Sleep(2 * time.Second)
+	time.Sleep(2 * time.Second)
 
-    beehive.Release()
+	beehive.Release()
 }
 
 ```
