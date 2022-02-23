@@ -1,7 +1,6 @@
-package handler
+package api
 
 import (
-	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
@@ -34,7 +33,7 @@ func ClientInfo(c *gin.Context) {
 	if ID == "" {
 		ID = c.DefaultQuery("id", "0")
 	}
-	fmt.Printf("%+v\n", c.MustGet("client").(*auth.ClientAuth))
+
 	clientID, _ := strconv.ParseUint(ID, 10, 64)
 	if clientID == 0 {
 		c.AbortWithStatusJSON(http.StatusBadRequest, res.NewJsonError(InvalidParams, ErrInvalidParam))

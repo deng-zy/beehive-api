@@ -2,7 +2,7 @@ package router
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/gordon-zhiyong/beehive-api/internal/handler"
+	"github.com/gordon-zhiyong/beehive-api/internal/api"
 	"github.com/gordon-zhiyong/beehive-api/internal/middleware"
 )
 
@@ -12,10 +12,10 @@ func Router(app *gin.Engine) {
 
 func apiRouter(r *gin.RouterGroup) {
 	r.Use(middleware.ClientOAuth())
-	r.POST("/client/oauth/token", handler.IssueClientToken)
-	r.POST("/client/oauth/token/refresh", handler.RefreshClientToken)
-	r.POST("/clients", handler.CreateClient)
-	r.GET("/clients", handler.GetClients)
-	r.GET("/client/:id", handler.ClientInfo)
-	r.GET("/client", handler.ClientInfo)
+	r.POST("/client/oauth/token", api.IssueClientToken)
+	r.POST("/client/oauth/token/refresh", api.RefreshClientToken)
+	r.POST("/clients", api.CreateClient)
+	r.GET("/clients", api.GetClients)
+	r.GET("/client/:id", api.ClientInfo)
+	r.GET("/client", api.ClientInfo)
 }
