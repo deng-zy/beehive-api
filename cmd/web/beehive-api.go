@@ -1,9 +1,9 @@
 package main
 
 import (
-	"github.com/gordon-zhiyong/beehive-api/internal/app/web"
+	"github.com/gordon-zhiyong/beehive-api/internal/app"
 )
 
 func main() {
-	web.Run()
+	app.Run()
 }
