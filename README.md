@@ -1,6 +1,5 @@
 # beehive
-
-thanks https://github1s.com/panjf2000/ants
+一个高性能，分布式事件处理框架。
 
 ## Description
 Go event system
