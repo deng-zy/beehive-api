@@ -4,41 +4,36 @@ import (
 	"sync"
 	"time"
 
+	"github.com/gordon-zhiyong/beehive-api/pkg/conf"
 	"github.com/pkg/errors"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
 
-var prefix = "database"
-var defaultName = "default"
+var (
+	defaultName        = "default"
+	defaultMaxIdle     = 10
+	defaultMaxConns    = 20
+	defaultMaxLifetime = 10 * time.Minute
+	maxIdle            int
+	maxConns           int
+	maxLifetime        time.Duration
+	defaultConn        string
+	dbMutex            sync.RWMutex
+)
+
 var dbConnections = map[string]*gorm.DB{}
-var DB *gorm.DB
-var dbMutex sync.RWMutex
 
-func init() {
-	var err error
-	DB, err = dbConnect(defaultName)
-	if err != nil {
-		panic(err)
-	}
-}
-
-func dbConnect(name string) (*gorm.DB, error) {
-	dsn := getDSN(name)
-	db, err := gorm.Open(mysql.Open(dsn))
-	if err != nil {
-		return nil, err
+func GetDB(name ...string) *gorm.DB {
+	if maxIdle == 0 {
+		setDefaultSetting()
 	}
 
-	sqlDB, err := db.DB()
-	if err != nil {
-		return nil, errors.Wrap(err, "get sqlDB fail.")
+	if len(name) == 0 {
+		return NewDBConnect(defaultConn)
 	}
-	sqlDB.SetMaxIdleConns(10)
-	sqlDB.SetMaxOpenConns(20)
-	sqlDB.SetConnMaxLifetime(10 * time.Minute)
 
-	return db, nil
+	return NewDBConnect(name[0])
 }
 
 func NewDBConnect(name string) *gorm.DB {
@@ -61,6 +56,59 @@ func NewDBConnect(name string) *gorm.DB {
 	return conn
 }
 
-func getDSN(name string) string {
-	return "b2c_oversea_test:BPSBgEo9ZwKn!cj@tcp(172.16.10.25:3306)/beehive?charset=utf8mb4&parseTime=True&loc=Local"
+func dbConnect(name string) (*gorm.DB, error) {
+	if maxIdle == 0 {
+		setDefaultSetting()
+	}
+
+	dsn := getDSN(name)
+	db, err := gorm.Open(mysql.Open(dsn))
+	if err != nil {
+		return nil, err
+	}
+
+	sqlDB, err := db.DB()
+	if err != nil {
+		return nil, errors.Wrap(err, "get sqlDB fail.")
+	}
+
+	sqlDB.SetMaxIdleConns(maxIdle)
+	sqlDB.SetMaxOpenConns(maxConns)
+	sqlDB.SetConnMaxLifetime(maxLifetime)
+
+	return db, nil
+}
+
+func setDefaultSetting() {
+	defaultConn = conf.DB.GetString("default")
+	maxIdle = conf.DB.GetInt("maxIdle")
+	maxConns = conf.DB.GetInt("maxConns")
+	maxLifetime = conf.DB.GetDuration("maxLifetime")
+
+	if maxIdle == 0 {
+		maxIdle = defaultMaxIdle
+	}
+
+	if maxConns == 0 {
+		maxConns = defaultMaxConns
+	}
+
+	if defaultConn == "" {
+		defaultConn = defaultName
+	}
+
+	if maxLifetime == 0 {
+		maxLifetime = defaultMaxLifetime
+	}
+}
+
+func getDSN(conn string) string {
+	username := conf.DB.GetString(conn + ".user")
+	password := conf.DB.GetString(conn + ".password")
+	host := conf.DB.GetString(conn + ".host")
+	port := conf.DB.GetString(conn + ".port")
+	charset := conf.DB.GetString(conn + ".charset")
+	dbName := conf.DB.GetString(conn + ".name")
+
+	return username + ":" + password + "@tcp(" + host + ":" + port + ")/" + dbName + "?charset=" + charset + "&parseTime=True&loc=Local"
 }

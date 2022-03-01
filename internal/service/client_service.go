@@ -31,18 +31,18 @@ func NewClient() *Client {
 }
 
 func (c *Client) Create(name string) {
-	ctx := context.WithValue(context.TODO(), "db", capsule.DB)
+	ctx := context.WithValue(context.TODO(), "db", capsule.GetDB())
 	secret := c.generateSecret()
 	c.repo.Create(ctx, name, secret)
 }
 
 func (c *Client) Get() []*model.Client {
-	ctx := context.WithValue(context.TODO(), "db", capsule.DB)
+	ctx := context.WithValue(context.TODO(), "db", capsule.GetDB())
 	return c.repo.Get(ctx)
 }
 
 func (c *Client) Show(ID uint64) *model.Client {
-	ctx := context.WithValue(context.TODO(), "db", capsule.DB)
+	ctx := context.WithValue(context.TODO(), "db", capsule.GetDB())
 	return c.repo.WithId(ctx, ID)
 }
 
