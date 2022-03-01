@@ -1,5 +1,6 @@
 app:
   host: 127.0.0.1:8081
+  env: local
 oauth:
   expires: 2592000
   secret: MP^go7Kx&eHvsEMafpB66vFp

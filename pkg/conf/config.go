@@ -2,7 +2,6 @@ package conf
 
 import (
 	"errors"
-	"fmt"
 	"path"
 	"path/filepath"
 	"strings"
@@ -15,7 +14,7 @@ var DB *viper.Viper
 var Log *viper.Viper
 var App *viper.Viper
 var Auth *viper.Viper
-var Name string
+var File string
 
 var defaults map[string]string = map[string]string{
 	"app.host":                  ":8080",
@@ -38,17 +37,15 @@ func init() {
 	Conf = viper.New()
 }
 
-func Load(file, env string) {
-	Name = file
-	ext := path.Ext(Name)
-	dir := filepath.Dir(Name)
+func Load(file string) {
+	File = file
+	ext := path.Ext(File)
+	dir := filepath.Dir(File)
 
 	Conf.SetConfigType(strings.TrimLeft(ext, "."))
 	Conf.AddConfigPath(dir)
 	Conf.AutomaticEnv()
 	Conf.SetConfigFile(file)
-
-	defaults["app.env"] = env
 
 	err := Conf.ReadInConfig()
 	if err != nil {
@@ -57,12 +54,10 @@ func Load(file, env string) {
 
 	setDefault()
 	setSub()
-	fmt.Println("conf package", App.GetString("env"))
 }
 
 func setDefault() {
 	for k, v := range defaults {
-		fmt.Println(k, v)
 		Conf.SetDefault(k, v)
 	}
 }
