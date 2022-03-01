@@ -19,14 +19,13 @@ loggers:
     formatter: json
 database:
   maxIdle: 10
-  maxLifetime: 1500
+  maxLifetime: 10m
   maxConns: 30
+  default: beehive
   beehive:
-    host: 172.16.10.25
+    host: 127.0.0.1
     port: 3306
-    user: b2c_oversea_test
-    password: BPSBgEo9ZwKn!cj@tcp
+    user: root
+    password: gordon
     name: beehive
     charset: utf8mb4
-  
-
