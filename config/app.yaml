@@ -4,6 +4,9 @@ app:
 oauth:
   expires: 2592000
   secret: MP^go7Kx&eHvsEMafpB66vFp
+  token_name: Bearer
+  excepts:
+    - api/client/oauth/token
   lookup:
     - "header:Authorization"
     - "query:token"
