@@ -7,8 +7,37 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gordon-zhiyong/beehive-api/internal/api"
 	"github.com/gordon-zhiyong/beehive-api/internal/auth"
+	"github.com/gordon-zhiyong/beehive-api/pkg/conf"
 	"github.com/gordon-zhiyong/beehive-api/pkg/res"
 )
+
+type finder func(*gin.Context, string) string
+
+var finders = map[string]finder{
+	"header": func(c *gin.Context, key string) string {
+		authHeader := c.Request.Header.Get(key)
+		if authHeader == "" {
+			return ""
+		}
+
+		if !strings.HasPrefix(authHeader, conf.Auth.GetString("token_name")) {
+			return authHeader
+		}
+
+		parts := strings.SplitN(authHeader, " ", 2)
+		return parts[1]
+	},
+	"query": func(c *gin.Context, key string) string {
+		return c.Query(key)
+	},
+	"form": func(c *gin.Context, key string) string {
+		return c.PostForm(key)
+	},
+	"cookie": func(c *gin.Context, name string) string {
+		v, _ := c.Cookie(name)
+		return v
+	},
+}
 
 func ClientOAuth() gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -17,22 +46,22 @@ func ClientOAuth() gin.HandlerFunc {
 			return
 		}
 
-		authHeader := c.Request.Header.Get(auth.TOKEN_LOOKUP)
-		if authHeader == "" {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, res.NewJsonError(api.InvalidParams, api.ErrInvalidParam))
-			return
+		var token string
+		for _, method := range conf.Auth.GetStringSlice("lookup") {
+			if len(token) > 0 {
+				break
+			}
+
+			parts := strings.Split(method, ":")
+			find, _ := finders[parts[0]]
+			if find != nil {
+				token = find(c, parts[1])
+			}
 		}
 
-		var token string
-		if strings.HasPrefix(authHeader, auth.TOKEN_HEAD_NAME) {
-			parts := strings.SplitN(authHeader, " ", 2)
-			if parts[1] == "" {
-				c.AbortWithStatusJSON(http.StatusUnauthorized, res.NewJsonError(api.InvalidParams, api.ErrInvalidParam))
-				return
-			}
-			token = parts[1]
-		} else {
-			token = authHeader
+		if len(token) < 1 {
+			c.AbortWithStatusJSON(http.StatusBadRequest, res.NewJsonError(api.InvalidParams, api.ErrTokenIsEmpty))
+			return
 		}
 
 		client, err := auth.ParseToken(token)
@@ -47,7 +76,7 @@ func ClientOAuth() gin.HandlerFunc {
 }
 
 func shouldPassThrough(path string) bool {
-	excepts := []string{"api/client/oauth/token"}
+	excepts := conf.Auth.GetStringSlice("excepts")
 	path = strings.TrimLeft(path, "/")
 	for _, except := range excepts {
 		if except == path {
