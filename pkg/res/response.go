@@ -17,15 +17,15 @@ type JsonError struct {
 	err  error
 }
 
-func (j *JsonError) Error() string {
+func (j JsonError) Error() string {
 	return j.err.Error()
 }
 
-func (j *JsonError) String() string {
+func (j JsonError) String() string {
 	return fmt.Sprintf("code:%d, message:%s", j.code, j.err.Error())
 }
 
-func (j *JsonError) MarshalJSON() ([]byte, error) {
+func (j JsonError) MarshalJSON() ([]byte, error) {
 	return json.Marshal(&JsonResult{
 		Success: false,
 		Code:    j.code,
