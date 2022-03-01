@@ -1,0 +1,28 @@
+app:
+  host: 127.0.0.1:8081
+oauth:
+  expires: 2592000
+  secret: MP^go7Kx&eHvsEMafpB66vFp
+  lookup:
+    - "header:Authorization"
+    - "query:token"
+    - "cookie:token"
+    - "form:token"
+loggers:
+  beehive:
+    file: ./logs/beehive.log
+    level: info
+    formatter: json
+database:
+  maxIdle: 10
+  maxLifetime: 1500
+  maxConns: 30
+  beehive:
+    host: 172.16.10.25
+    port: 3306
+    user: b2c_oversea_test
+    password: BPSBgEo9ZwKn!cj@tcp
+    name: beehive
+    charset: utf8mb4
+  
+
