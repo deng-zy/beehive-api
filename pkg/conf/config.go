@@ -2,6 +2,8 @@ package conf
 
 import (
 	"errors"
+	"fmt"
+	"os"
 	"path"
 	"path/filepath"
 	"strings"
@@ -9,23 +11,28 @@ import (
 	"github.com/spf13/viper"
 )
 
-// Conf 程序配置
-var Conf *viper.Viper
+var (
+	// Conf 程序配置
+	Conf *viper.Viper
 
-// DB 数据库配置
-var DB *viper.Viper
+	// DB 数据库配置
+	DB *viper.Viper
 
-// Log 日志配置
-var Log *viper.Viper
+	// Log 日志配置
+	Log *viper.Viper
 
-// App 应用配置
-var App *viper.Viper
+	// App 应用配置
+	App *viper.Viper
 
-// Auth 认证相关配置
-var Auth *viper.Viper
+	// Auth 认证相关配置
+	Auth *viper.Viper
 
-// File 配置文件
-var File string
+	// File 配置文件
+	File string
+
+	defaultFile = "./config/app.yaml"
+	replacer    = strings.NewReplacer(".", "_")
+)
 
 // defaults 默认配置
 var defaults = map[string]string{
@@ -48,16 +55,19 @@ var defaults = map[string]string{
 
 func init() {
 	Conf = viper.New()
+	Conf.SetEnvKeyReplacer(replacer)
 }
 
-// Load 从文件加载配置
+// Load 加载配置文件
 func Load(file string) {
 	File = file
 	ext := path.Ext(File)
 	dir := filepath.Dir(File)
+	wd, _ := os.Getwd()
 
 	Conf.SetConfigType(strings.TrimLeft(ext, "."))
 	Conf.AddConfigPath(dir)
+	Conf.AddConfigPath(wd)
 	Conf.AutomaticEnv()
 	Conf.SetConfigFile(file)
 
@@ -81,4 +91,10 @@ func setSub() {
 	Log = Conf.Sub("loggers")
 	Auth = Conf.Sub("oauth")
 	App = Conf.Sub("app")
+
+	DB.SetEnvKeyReplacer(replacer)
+	Log.SetEnvKeyReplacer(replacer)
+	Auth.SetEnvKeyReplacer(replacer)
+	App.SetEnvKeyReplacer(replacer)
+	fmt.Println(Conf.GetString("database.beehive.debug"))
 }

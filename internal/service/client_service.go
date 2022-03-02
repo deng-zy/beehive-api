@@ -13,6 +13,7 @@ import (
 	"github.com/gordon-zhiyong/beehive-api/pkg/capsule"
 )
 
+// Client Client service
 type Client struct {
 	repo *repositories.Client
 }
@@ -20,6 +21,7 @@ type Client struct {
 var clientOnce sync.Once
 var client *Client
 
+// NewClient create a Client instance
 func NewClient() *Client {
 	clientOnce.Do(func() {
 		client = &Client{
@@ -30,22 +32,26 @@ func NewClient() *Client {
 	return client
 }
 
+// Create create a new client
 func (c *Client) Create(name string) {
-	ctx := context.WithValue(context.TODO(), "db", capsule.GetDB())
+	ctx := context.WithValue(context.TODO(), "db", capsule.DB)
 	secret := c.generateSecret()
 	c.repo.Create(ctx, name, secret)
 }
 
+// Get get client list
 func (c *Client) Get() []*model.Client {
-	ctx := context.WithValue(context.TODO(), "db", capsule.GetDB())
+	ctx := context.WithValue(context.TODO(), "db", capsule.DB)
 	return c.repo.Get(ctx)
 }
 
+// Show show client info
 func (c *Client) Show(ID uint64) *model.Client {
-	ctx := context.WithValue(context.TODO(), "db", capsule.GetDB())
+	ctx := context.WithValue(context.TODO(), "db", capsule.DB)
 	return c.repo.WithId(ctx, ID)
 }
 
+// IssueToken issue auth token
 func (c *Client) IssueToken(ID uint64, secret string) (string, error) {
 	client := c.Show(ID)
 	if client == nil {
@@ -53,7 +59,7 @@ func (c *Client) IssueToken(ID uint64, secret string) (string, error) {
 	}
 
 	if client.Secret != secret {
-		return "", errors.New("secret error.")
+		return "", errors.New("secret error")
 	}
 
 	return auth.IssueToken(client.Id, client.Name)

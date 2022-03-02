@@ -6,6 +6,7 @@ import (
 
 	"github.com/gordon-zhiyong/beehive-api/pkg/conf"
 	"github.com/pkg/errors"
+	"github.com/spf13/viper"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
@@ -20,10 +21,24 @@ var (
 	maxLifetime        time.Duration
 	defaultConn        string
 	dbMutex            sync.RWMutex
+	config             *viper.Viper
 )
 
 var dbConnections = map[string]*gorm.DB{}
 
+// DB default database connection
+var DB *gorm.DB
+
+// Init initialization default setting
+func Init() {
+	if DB != nil {
+		return
+	}
+	config = conf.DB
+	DB = GetDB()
+}
+
+// GetDB get databse connnection
 func GetDB(name ...string) *gorm.DB {
 	if maxIdle == 0 {
 		setDefaultSetting()
@@ -36,6 +51,7 @@ func GetDB(name ...string) *gorm.DB {
 	return NewDBConnect(name[0])
 }
 
+// NewDBConnect new database connection
 func NewDBConnect(name string) *gorm.DB {
 	dbMutex.RLock()
 	connection, exists := dbConnections[name]
@@ -69,7 +85,7 @@ func dbConnect(name string) (*gorm.DB, error) {
 
 	sqlDB, err := db.DB()
 	if err != nil {
-		return nil, errors.Wrap(err, "get sqlDB fail.")
+		return nil, errors.Wrap(err, "get sqlDB fail")
 	}
 
 	sqlDB.SetMaxIdleConns(maxIdle)
@@ -80,10 +96,10 @@ func dbConnect(name string) (*gorm.DB, error) {
 }
 
 func setDefaultSetting() {
-	defaultConn = conf.DB.GetString("default")
-	maxIdle = conf.DB.GetInt("maxIdle")
-	maxConns = conf.DB.GetInt("maxConns")
-	maxLifetime = conf.DB.GetDuration("maxLifetime")
+	defaultConn = config.GetString("default")
+	maxIdle = config.GetInt("maxIdle")
+	maxConns = config.GetInt("maxConns")
+	maxLifetime = config.GetDuration("maxLifetime")
 
 	if maxIdle == 0 {
 		maxIdle = defaultMaxIdle

@@ -13,6 +13,7 @@ import (
 
 var clientService = service.NewClient()
 
+// CreateClient 创建新的客户端
 func CreateClient(c *gin.Context) {
 	name := strings.Trim(c.PostForm("name"), " ")
 	if len(name) < 1 || name == "" {
@@ -24,6 +25,7 @@ func CreateClient(c *gin.Context) {
 	c.JSON(http.StatusOK, res.JsonSuccess())
 }
 
+// GetClients 获取客户端列表
 func GetClients(c *gin.Context) {
 	c.JSON(http.StatusOK, res.JsonData(clientService.Get()))
 }
