@@ -9,14 +9,26 @@ import (
 	"github.com/spf13/viper"
 )
 
+// Conf 程序配置
 var Conf *viper.Viper
+
+// DB 数据库配置
 var DB *viper.Viper
+
+// Log 日志配置
 var Log *viper.Viper
+
+// App 应用配置
 var App *viper.Viper
+
+// Auth 认证相关配置
 var Auth *viper.Viper
+
+// File 配置文件
 var File string
 
-var defaults map[string]string = map[string]string{
+// defaults 默认配置
+var defaults = map[string]string{
 	"app.host":                  ":8080",
 	"app.env":                   "production",
 	"database.beehive.host":     "127.0.0.0.1",
@@ -38,6 +50,7 @@ func init() {
 	Conf = viper.New()
 }
 
+// Load 从文件加载配置
 func Load(file string) {
 	File = file
 	ext := path.Ext(File)
