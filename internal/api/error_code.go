@@ -7,4 +7,6 @@ const (
 	ObjectNotFound = iota
 	// AuthFail 验证失败
 	AuthFail
+	// SystemInternalError 系统内部错误
+	SystemInternalError
 )

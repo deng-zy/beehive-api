@@ -2,7 +2,6 @@ package conf
 
 import (
 	"bytes"
-	"fmt"
 	"io"
 	"os"
 	"path"
@@ -60,8 +59,6 @@ var defaults = map[string]string{
 func init() {
 	gotenv.Load()
 	Conf = viper.New()
-	setDefault()
-	setSub()
 }
 
 // Load 加载配置文件
@@ -96,14 +93,13 @@ func setDefault() {
 func setSub() {
 	DB = Conf.Sub("database")
 	Log = Conf.Sub("loggers")
-	Auth = Conf.Sub("oauth")
+	Auth = Conf.Sub("auth")
 	App = Conf.Sub("app")
 
 	DB.SetEnvKeyReplacer(replacer)
 	Log.SetEnvKeyReplacer(replacer)
 	Auth.SetEnvKeyReplacer(replacer)
 	App.SetEnvKeyReplacer(replacer)
-	fmt.Println(Conf.GetString("database.beehive.debug"))
 }
 
 func replacePlaceholder(content []byte) io.Reader {

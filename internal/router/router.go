@@ -18,4 +18,8 @@ func apiRouter(r *gin.RouterGroup) {
 	r.GET("/clients", api.GetClients)
 	r.GET("/client/:id", api.ClientInfo)
 	r.GET("/client", api.ClientInfo)
+	r.POST("/topics", api.CreateTopic)
+	r.GET("/topics", api.GetTopics)
+	r.PUT("/topics/:id", api.UpdateTopic)
+	r.DELETE("/topics/:id", api.DeleteTopic)
 }

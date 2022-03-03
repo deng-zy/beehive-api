@@ -1,7 +1,7 @@
 app:
   host: 127.0.0.1:8080
   env: local
-oauth:
+auth:
   expires: 2592000s
   secret: $AUTH_SECRET
   token_name: Bearer

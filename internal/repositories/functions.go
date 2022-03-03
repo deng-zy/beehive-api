@@ -11,3 +11,14 @@ func WithID(ID uint64) Option {
 		db.Where("`id` = ?", ID)
 	}
 }
+
+// WithName add query where name=xxxx
+func WithName(name string) Option {
+	return func(db *gorm.DB) {
+		if name == "" {
+			return
+		}
+
+		db.Where("`name` = ?", name)
+	}
+}
