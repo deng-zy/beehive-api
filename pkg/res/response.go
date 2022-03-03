@@ -5,28 +5,31 @@ import (
 	"fmt"
 )
 
-type JsonResult struct {
+// JSONResult api response body
+type JSONResult struct {
 	Success bool        `json:"success"`
 	Code    int         `json:"code"`
 	Message string      `json:"message"`
 	Data    interface{} `json:"data"`
 }
 
-type JsonError struct {
+// JSONError api response error
+type JSONError struct {
 	code int
 	err  error
 }
 
-func (j JsonError) Error() string {
+func (j JSONError) Error() string {
 	return j.err.Error()
 }
 
-func (j JsonError) String() string {
+func (j JSONError) String() string {
 	return fmt.Sprintf("code:%d, message:%s", j.code, j.err.Error())
 }
 
-func (j JsonError) MarshalJSON() ([]byte, error) {
-	return json.Marshal(&JsonResult{
+// MarshalJSON JSONError json encode
+func (j JSONError) MarshalJSON() ([]byte, error) {
+	return json.Marshal(&JSONResult{
 		Success: false,
 		Code:    j.code,
 		Message: j.err.Error(),
@@ -34,8 +37,9 @@ func (j JsonError) MarshalJSON() ([]byte, error) {
 	})
 }
 
-func JsonSuccess() *JsonResult {
-	return &JsonResult{
+// JSONSuccess api reseponse success
+func JSONSuccess() *JSONResult {
+	return &JSONResult{
 		Success: true,
 		Code:    0,
 		Message: "success",
@@ -43,8 +47,9 @@ func JsonSuccess() *JsonResult {
 	}
 }
 
-func JsonData(data interface{}) *JsonResult {
-	return &JsonResult{
+// JSONData api response data
+func JSONData(data interface{}) *JSONResult {
+	return &JSONResult{
 		Success: true,
 		Code:    0,
 		Message: "success",
@@ -52,8 +57,9 @@ func JsonData(data interface{}) *JsonResult {
 	}
 }
 
-func NewJsonError(code int, err error) *JsonError {
-	return &JsonError{
+// NewJSONError new api error
+func NewJSONError(code int, err error) error {
+	return &JSONError{
 		code: code,
 		err:  err,
 	}

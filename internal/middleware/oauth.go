@@ -39,6 +39,7 @@ var finders = map[string]finder{
 	},
 }
 
+// ClientOAuth token验证中间件
 func ClientOAuth() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		if shouldPassThrough(c.Request.URL.Path) {
@@ -60,13 +61,13 @@ func ClientOAuth() gin.HandlerFunc {
 		}
 
 		if len(token) < 1 {
-			c.AbortWithStatusJSON(http.StatusBadRequest, res.NewJsonError(api.InvalidParams, api.ErrTokenIsEmpty))
+			c.AbortWithStatusJSON(http.StatusBadRequest, res.NewJSONError(api.InvalidParams, api.ErrTokenIsEmpty))
 			return
 		}
 
 		client, err := auth.ParseToken(token)
 		if err != nil {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, res.NewJsonError(api.AuthFail, api.ErrAuthFail))
+			c.AbortWithStatusJSON(http.StatusUnauthorized, res.NewJSONError(api.AuthFail, api.ErrAuthFail))
 			return
 		}
 

@@ -16,19 +16,20 @@ import (
 func CreateClient(c *gin.Context) {
 	name := strings.Trim(c.PostForm("name"), " ")
 	if len(name) < 1 || name == "" {
-		c.AbortWithStatusJSON(http.StatusBadRequest, res.NewJsonError(InvalidParams, ErrInvalidParam))
+		c.AbortWithStatusJSON(http.StatusBadRequest, res.NewJSONError(InvalidParams, ErrInvalidParam))
 		return
 	}
 
 	service.NewClient().Create(name)
-	c.JSON(http.StatusOK, res.JsonSuccess())
+	c.JSON(http.StatusOK, res.JSONSuccess())
 }
 
 // GetClients 获取客户端列表
 func GetClients(c *gin.Context) {
-	c.JSON(http.StatusOK, res.JsonData(service.NewClient().Get()))
+	c.JSON(http.StatusOK, res.JSONData(service.NewClient().Get()))
 }
 
+// ClientInfo 获取客户端信息
 func ClientInfo(c *gin.Context) {
 	ID := c.Param("id")
 	if ID == "" {
@@ -37,54 +38,56 @@ func ClientInfo(c *gin.Context) {
 
 	clientID, _ := strconv.ParseUint(ID, 10, 64)
 	if clientID == 0 {
-		c.AbortWithStatusJSON(http.StatusBadRequest, res.NewJsonError(InvalidParams, ErrInvalidParam))
+		c.AbortWithStatusJSON(http.StatusBadRequest, res.NewJSONError(InvalidParams, ErrInvalidParam))
 		return
 	}
 
 	client := service.NewClient().Show(clientID)
 	if client == nil {
-		c.AbortWithStatusJSON(http.StatusNotFound, res.NewJsonError(ObjectNotFound, ErrObjectNotFound))
+		c.AbortWithStatusJSON(http.StatusNotFound, res.NewJSONError(ObjectNotFound, ErrObjectNotFound))
 		return
 	}
-	c.JSON(http.StatusOK, res.JsonData(client))
+	c.JSON(http.StatusOK, res.JSONData(client))
 }
 
+// IssueClientToken 签发token
 func IssueClientToken(c *gin.Context) {
 	req := &auth.AuthRequest{}
 	err := c.ShouldBind(req)
 	if err != nil || req.ClientID < 1 || len(req.Secret) < 24 {
-		c.AbortWithStatusJSON(http.StatusBadRequest, res.NewJsonError(InvalidParams, ErrInvalidParam))
+		c.AbortWithStatusJSON(http.StatusBadRequest, res.NewJSONError(InvalidParams, ErrInvalidParam))
 		return
 	}
 
 	var token string
 	token, err = service.NewClient().IssueToken(req.ClientID, req.Secret)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, res.NewJsonError(AuthFail, err))
+		c.AbortWithStatusJSON(http.StatusBadRequest, res.NewJSONError(AuthFail, err))
 		return
 	}
 
-	c.JSON(http.StatusOK, res.JsonData(gin.H{
+	c.JSON(http.StatusOK, res.JSONData(gin.H{
 		"token":      token,
 		"token_type": conf.Auth.GetString("token_name"),
 		"expire_in":  conf.Auth.GetInt("expires"),
 	}))
 }
 
+// RefreshClientToken 刷新客户端token
 func RefreshClientToken(c *gin.Context) {
 	client, ok := c.MustGet("client").(*auth.ClientAuth)
 	if !ok {
-		c.AbortWithStatusJSON(http.StatusBadRequest, res.NewJsonError(InvalidParams, ErrInvalidParam))
+		c.AbortWithStatusJSON(http.StatusBadRequest, res.NewJSONError(InvalidParams, ErrInvalidParam))
 		return
 	}
 
 	token, err := auth.ReFreshToken(client)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, res.NewJsonError(InvalidParams, ErrInvalidParam))
+		c.AbortWithStatusJSON(http.StatusBadRequest, res.NewJSONError(InvalidParams, ErrInvalidParam))
 		return
 	}
 
-	c.JSON(http.StatusOK, res.JsonData(gin.H{
+	c.JSON(http.StatusOK, res.JSONData(gin.H{
 		"token":      token,
 		"token_type": conf.Auth.GetString("token_name"),
 		"expire_in":  conf.Auth.GetInt("expires"),
