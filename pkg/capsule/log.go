@@ -61,10 +61,15 @@ func NewLogger(option ...string) *logrus.Logger {
 		logger.SetFormatter(&logrus.JSONFormatter{})
 	}
 
-	if level := logConf.GetUint32(name + ".level"); level != 0 {
-		logger.SetLevel(logrus.Level(level))
-	} else {
-		logger.SetLevel(logrus.DebugLevel)
+	logger.SetLevel(logrus.InfoLevel)
+	if level := logConf.GetUint32(name + ".level"); level > 0 {
+		l := logrus.Level(level)
+		for _, v := range logrus.AllLevels {
+			if v == l {
+				logger.SetLevel(logrus.Level(level))
+				break
+			}
+		}
 	}
 
 	logger.SetOutput(io.MultiWriter(writers...))

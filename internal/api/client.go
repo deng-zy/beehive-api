@@ -8,6 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gordon-zhiyong/beehive-api/internal/auth"
 	"github.com/gordon-zhiyong/beehive-api/internal/service"
+	"github.com/gordon-zhiyong/beehive-api/pkg/conf"
 	"github.com/gordon-zhiyong/beehive-api/pkg/res"
 )
 
@@ -65,8 +66,8 @@ func IssueClientToken(c *gin.Context) {
 
 	c.JSON(http.StatusOK, res.JsonData(gin.H{
 		"token":      token,
-		"token_type": auth.TOKEN_HEAD_NAME,
-		"expire_in":  auth.EXPIRES,
+		"token_type": conf.Auth.GetString("token_name"),
+		"expire_in":  conf.Auth.GetInt("expires"),
 	}))
 }
 
@@ -85,7 +86,7 @@ func RefreshClientToken(c *gin.Context) {
 
 	c.JSON(http.StatusOK, res.JsonData(gin.H{
 		"token":      token,
-		"token_type": auth.TOKEN_HEAD_NAME,
-		"expire_in":  auth.EXPIRES,
+		"token_type": conf.Auth.GetString("token_name"),
+		"expire_in":  conf.Auth.GetInt("expires"),
 	}))
 }

@@ -4,6 +4,8 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
+	"github.com/gordon-zhiyong/beehive-api/pkg/bytesconv"
+	"github.com/gordon-zhiyong/beehive-api/pkg/conf"
 	"github.com/pkg/errors"
 )
 
@@ -18,19 +20,15 @@ type AuthRequest struct {
 	Secret   string `json:"secret" form:"secret" xml:"secret" binding:"required"`
 }
 
-const EXPIRES = 720 * time.Hour //30 days
-const TOKEN_LOOKUP = "Authorization"
-const TOKEN_HEAD_NAME = "Bearer"
-
-var secret = []byte("MP^go7Kx&eHvsEMafpB66vFp")
-
 func IssueToken(ID uint64, name string) (string, error) {
 	now := time.Now().Unix()
+	expires := conf.Auth.GetDuration("expires")
+
 	claims := &ClientAuth{
 		Name:     name,
 		ClientID: ID,
 		StandardClaims: jwt.StandardClaims{
-			ExpiresAt: time.Now().Add(EXPIRES).Unix(),
+			ExpiresAt: time.Now().Add(expires).Unix(),
 			NotBefore: now,
 			IssuedAt:  now,
 			Subject:   name,
@@ -38,12 +36,12 @@ func IssueToken(ID uint64, name string) (string, error) {
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	return token.SignedString(secret)
+	return token.SignedString(bytesconv.StringToBytes(conf.Auth.GetString("secret")))
 }
 
 func ParseToken(tokenString string) (*ClientAuth, error) {
 	token, err := jwt.ParseWithClaims(tokenString, &ClientAuth{}, func(token *jwt.Token) (interface{}, error) {
-		return secret, nil
+		return bytesconv.StringToBytes(conf.Auth.GetString("secret")), nil
 	})
 
 	if err != nil {
@@ -63,8 +61,9 @@ func ParseToken(tokenString string) (*ClientAuth, error) {
 }
 
 func ReFreshToken(client *ClientAuth) (string, error) {
-	client.StandardClaims.ExpiresAt = time.Now().Add(EXPIRES).Unix()
+	expires := conf.Auth.GetDuration("expires")
+	client.StandardClaims.ExpiresAt = time.Now().Add(expires).Unix()
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, client)
-	return token.SignedString(secret)
+	return token.SignedString(bytesconv.StringToBytes(conf.Auth.GetString("secret")))
 }
