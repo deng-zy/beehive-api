@@ -18,7 +18,7 @@ func main() {
 	flag.Parse()
 	// 加载配置
 	conf.Load(configFile)
-	//初始数据库连接
+	//初始各种连接和Logger
 	capsule.Init()
 	//运行
 	app.Run()
