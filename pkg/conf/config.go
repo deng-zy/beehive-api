@@ -60,7 +60,8 @@ var defaults = map[string]string{
 func init() {
 	gotenv.Load()
 	Conf = viper.New()
-	Conf.SetEnvKeyReplacer(replacer)
+	setDefault()
+	setSub()
 }
 
 // Load 加载配置文件

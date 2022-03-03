@@ -65,6 +65,7 @@ func NewLogger(option ...string) *logrus.Logger {
 		}
 	}
 
+	logger.SetOutput(io.MultiWriter(writers...))
 	if formatter := logConf.GetString(name + ".formatter"); formatter == "json" {
 		logger.SetFormatter(&logrus.JSONFormatter{})
 	}
@@ -80,7 +81,6 @@ func NewLogger(option ...string) *logrus.Logger {
 		}
 	}
 
-	logger.SetOutput(io.MultiWriter(writers...))
 	return logger
 }
 
