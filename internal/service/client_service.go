@@ -10,6 +10,7 @@ import (
 	"github.com/gordon-zhiyong/beehive-api/internal/auth"
 	"github.com/gordon-zhiyong/beehive-api/internal/model"
 	"github.com/gordon-zhiyong/beehive-api/internal/repositories"
+	"github.com/gordon-zhiyong/beehive-api/pkg/bytesconv"
 	"github.com/gordon-zhiyong/beehive-api/pkg/capsule"
 )
 
@@ -24,7 +25,7 @@ var client *Client
 // NewClient create a Client instance
 func NewClient() *Client {
 	clientOnce.Do(func() {
-		capsule.Init()
+		capsule.DBInit()
 		client = &Client{
 			repo: repositories.NewClient(),
 		}
@@ -72,5 +73,5 @@ func (c *Client) generateSecret() string {
 	for i := range buff {
 		buff[i] = letterBytes[rand.Intn(len(letterBytes))]
 	}
-	return string(buff)
+	return bytesconv.BytesToString(buff)
 }
