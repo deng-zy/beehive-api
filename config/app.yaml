@@ -1,5 +1,5 @@
 app:
-  host: 127.0.0.1:8081
+  host: 127.0.0.1:8080
   env: local
 oauth:
   expires: 2592000
@@ -23,9 +23,9 @@ database:
   maxConns: 30
   default: beehive
   beehive:
-    host: 127.0.0.1
-    port: 3306
-    user: root
-    password: gordon
-    name: beehive
+    host: $DATABASE_BEEHIVE_HOST
+    port: $DATABASE_BEEHIVE_PORT
+    user: $DATABASE_BEEHIVE_USER
+    password: $DATABASE_BEEHIVE_PASSWORD
+    name: $DATABASE_BEEHIVE_NAME
     charset: utf8mb4

@@ -3,6 +3,7 @@ package capsule
 import (
 	"io"
 	"os"
+	"path/filepath"
 	"sync"
 
 	"github.com/gordon-zhiyong/beehive-api/pkg/conf"
@@ -13,12 +14,13 @@ import (
 var (
 	loggers  = make(map[string]*logrus.Logger)
 	logMutex sync.RWMutex
-	config   *viper.Viper
+	logConf  *viper.Viper
 )
 
+// NewLogger create log instance
 func NewLogger(option ...string) *logrus.Logger {
-	if config == nil {
-		config = conf.Log
+	if logConf == nil {
+		logConf = conf.Log
 	}
 
 	var name string
@@ -48,22 +50,35 @@ func NewLogger(option ...string) *logrus.Logger {
 		err    error
 	)
 
-	if writer, err = os.OpenFile(logFile, os.O_WRONLY|os.O_CREATE, 0755); err == nil {
-		writers = append(writers, writer)
+	if logFile != "" {
+		writer, err = openLogFile(logFile)
+		if err == nil {
+			writers = append(writers, writer)
+		}
 	}
 
-	if formatter := config.GetString(name + ".formatter"); formatter == "json" {
+	if formatter := logConf.GetString(name + ".formatter"); formatter == "json" {
 		logger.SetFormatter(&logrus.JSONFormatter{})
 	}
 
-	if level := config.GetUint32(name + ".level"); level != 0 {
+	if level := logConf.GetUint32(name + ".level"); level != 0 {
 		logger.SetLevel(logrus.Level(level))
 	} else {
 		logger.SetLevel(logrus.DebugLevel)
 	}
 
-	logger.SetLevel()
-
 	logger.SetOutput(io.MultiWriter(writers...))
 	return logger
+}
+
+func openLogFile(filename string) (file *os.File, err error) {
+	dir := filepath.Dir(filename)
+	pwd, _ := os.Getwd()
+	path := filepath.Join(pwd, dir)
+	if _, err := os.Stat(path); !os.IsExist(err) {
+		os.Mkdir(path, 0755)
+	}
+
+	file, err = os.OpenFile(filename, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0755)
+	return
 }

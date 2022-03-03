@@ -24,6 +24,7 @@ var client *Client
 // NewClient create a Client instance
 func NewClient() *Client {
 	clientOnce.Do(func() {
+		capsule.Init()
 		client = &Client{
 			repo: repositories.NewClient(),
 		}

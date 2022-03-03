@@ -1,14 +1,18 @@
 package conf
 
 import (
-	"errors"
+	"bytes"
 	"fmt"
+	"io"
 	"os"
 	"path"
 	"path/filepath"
 	"strings"
 
+	"github.com/gordon-zhiyong/beehive-api/pkg/bytesconv"
+	"github.com/gordon-zhiyong/beehive-api/pkg/helper"
 	"github.com/spf13/viper"
+	"github.com/subosito/gotenv"
 )
 
 var (
@@ -54,6 +58,7 @@ var defaults = map[string]string{
 }
 
 func init() {
+	gotenv.Load()
 	Conf = viper.New()
 	Conf.SetEnvKeyReplacer(replacer)
 }
@@ -71,10 +76,11 @@ func Load(file string) {
 	Conf.AutomaticEnv()
 	Conf.SetConfigFile(file)
 
-	err := Conf.ReadInConfig()
+	content, err := helper.ReadFile(file)
 	if err != nil {
-		panic(errors.New(err.Error()))
+		panic(err)
 	}
+	Conf.ReadConfig(replacePlaceholder(content))
 
 	setDefault()
 	setSub()
@@ -97,4 +103,13 @@ func setSub() {
 	Auth.SetEnvKeyReplacer(replacer)
 	App.SetEnvKeyReplacer(replacer)
 	fmt.Println(Conf.GetString("database.beehive.debug"))
+}
+
+func replacePlaceholder(content []byte) io.Reader {
+	tmp := bytesconv.BytesToString(content)
+	for _, variable := range os.Environ() {
+		parts := strings.Split(variable, "=")
+		tmp = strings.ReplaceAll(tmp, "$"+parts[0], parts[1])
+	}
+	return bytes.NewReader(bytesconv.StringToBytes(tmp))
 }

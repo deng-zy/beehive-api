@@ -28,14 +28,14 @@ var dbConnections = map[string]*gorm.DB{}
 
 // DB default database connection
 var DB *gorm.DB
+var dbOnce sync.Once
 
-// Init initialization default setting
-func Init() {
-	if DB != nil {
-		return
-	}
-	config = conf.DB
-	DB = GetDB()
+// DBInit initialization default setting
+func DBInit() {
+	dbOnce.Do(func() {
+		config = conf.DB
+		DB = GetDB()
+	})
 }
 
 // GetDB get databse connnection

@@ -11,8 +11,6 @@ import (
 	"github.com/gordon-zhiyong/beehive-api/pkg/res"
 )
 
-var clientService = service.NewClient()
-
 // CreateClient 创建新的客户端
 func CreateClient(c *gin.Context) {
 	name := strings.Trim(c.PostForm("name"), " ")
@@ -21,13 +19,13 @@ func CreateClient(c *gin.Context) {
 		return
 	}
 
-	clientService.Create(name)
+	service.NewClient().Create(name)
 	c.JSON(http.StatusOK, res.JsonSuccess())
 }
 
 // GetClients 获取客户端列表
 func GetClients(c *gin.Context) {
-	c.JSON(http.StatusOK, res.JsonData(clientService.Get()))
+	c.JSON(http.StatusOK, res.JsonData(service.NewClient().Get()))
 }
 
 func ClientInfo(c *gin.Context) {
@@ -42,7 +40,7 @@ func ClientInfo(c *gin.Context) {
 		return
 	}
 
-	client := clientService.Show(clientID)
+	client := service.NewClient().Show(clientID)
 	if client == nil {
 		c.AbortWithStatusJSON(http.StatusNotFound, res.NewJsonError(ObjectNotFound, ErrObjectNotFound))
 		return
@@ -59,7 +57,7 @@ func IssueClientToken(c *gin.Context) {
 	}
 
 	var token string
-	token, err = clientService.IssueToken(req.ClientID, req.Secret)
+	token, err = service.NewClient().IssueToken(req.ClientID, req.Secret)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, res.NewJsonError(AuthFail, err))
 		return
