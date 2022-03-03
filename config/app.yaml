@@ -2,8 +2,8 @@ app:
   host: 127.0.0.1:8080
   env: local
 oauth:
-  expires: 2592000
-  secret: MP^go7Kx&eHvsEMafpB66vFp
+  expires: 2592000s
+  secret: $AUTH_SECRET
   token_name: Bearer
   excepts:
     - api/client/oauth/token
