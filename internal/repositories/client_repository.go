@@ -10,12 +10,14 @@ import (
 	"gorm.io/gorm"
 )
 
+// Client client repository
 type Client struct {
 }
 
 var clientOnce sync.Once
 var client *Client
 
+// NewClient new client repository
 func NewClient() *Client {
 	clientOnce.Do(func() {
 		client = &Client{}
@@ -23,6 +25,7 @@ func NewClient() *Client {
 	return client
 }
 
+// Create create a new client
 func (c *Client) Create(ctx context.Context, name, secret string) bool {
 	db, ok := ctx.Value("db").(*gorm.DB)
 	fmt.Println(ok)
@@ -31,7 +34,7 @@ func (c *Client) Create(ctx context.Context, name, secret string) bool {
 	}
 
 	client := &model.Client{
-		Id:      snowflake.Generate(),
+		ID:      snowflake.Generate(),
 		Name:    name,
 		Secret:  secret,
 		Enabled: 1,
@@ -41,14 +44,16 @@ func (c *Client) Create(ctx context.Context, name, secret string) bool {
 	return true
 }
 
-func (c *Client) WithId(ctx context.Context, id uint64) *model.Client {
-	clients := c.Get(ctx, WithId(id))
+// WithID get client info with client id
+func (c *Client) WithID(ctx context.Context, id uint64) *model.Client {
+	clients := c.Get(ctx, WithID(id))
 	if clients == nil || len(clients) < 1 {
 		return nil
 	}
 	return clients[0]
 }
 
+// Get get client list
 func (c *Client) Get(ctx context.Context, options ...Option) []*model.Client {
 	db, ok := ctx.Value("db").(*gorm.DB)
 	if !ok {

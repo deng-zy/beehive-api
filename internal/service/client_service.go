@@ -49,7 +49,7 @@ func (c *Client) Get() []*model.Client {
 // Show show client info
 func (c *Client) Show(ID uint64) *model.Client {
 	ctx := context.WithValue(context.TODO(), "db", capsule.DB)
-	return c.repo.WithId(ctx, ID)
+	return c.repo.WithID(ctx, ID)
 }
 
 // IssueToken issue auth token
@@ -63,7 +63,7 @@ func (c *Client) IssueToken(ID uint64, secret string) (string, error) {
 		return "", errors.New("secret error")
 	}
 
-	return auth.IssueToken(client.Id, client.Name)
+	return auth.IssueToken(client.ID, client.Name)
 }
 
 func (c *Client) generateSecret() string {
