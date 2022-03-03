@@ -4,6 +4,7 @@ import (
 	"flag"
 
 	"github.com/gordon-zhiyong/beehive-api/internal/app"
+	"github.com/gordon-zhiyong/beehive-api/pkg/capsule"
 	"github.com/gordon-zhiyong/beehive-api/pkg/conf"
 )
 
@@ -15,6 +16,10 @@ func init() {
 
 func main() {
 	flag.Parse()
+	// 加载配置
 	conf.Load(configFile)
+	//初始数据库连接
+	capsule.Init()
+	//运行
 	app.Run()
 }

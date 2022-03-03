@@ -13,6 +13,7 @@ oauth:
     - "cookie:token"
     - "form:token"
 loggers:
+  default: beehive
   beehive:
     file: ./logs/beehive.log
     level: info

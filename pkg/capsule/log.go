@@ -17,12 +17,20 @@ var (
 	logConf  *viper.Viper
 )
 
+// Logger default logger
+var Logger *logrus.Logger
+
+func initLogger() {
+	logConf = conf.Log
+	if name := logConf.GetString("default"); name != "" {
+		Logger = NewLogger(name)
+	} else {
+		Logger = NewLogger("app")
+	}
+}
+
 // NewLogger create log instance
 func NewLogger(option ...string) *logrus.Logger {
-	if logConf == nil {
-		logConf = conf.Log
-	}
-
 	var name string
 	if len(option) > 0 {
 		name = option[0]

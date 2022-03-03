@@ -21,7 +21,7 @@ var (
 	maxLifetime        time.Duration
 	defaultConn        string
 	dbMutex            sync.RWMutex
-	config             *viper.Viper
+	dbConf             *viper.Viper
 )
 
 var dbConnections = map[string]*gorm.DB{}
@@ -30,25 +30,14 @@ var dbConnections = map[string]*gorm.DB{}
 var DB *gorm.DB
 var dbOnce sync.Once
 
-// DBInit initialization default setting
-func DBInit() {
+// initDB initialization default setting and default database connection
+func initDB() {
 	dbOnce.Do(func() {
-		config = conf.DB
-		DB = GetDB()
-	})
-}
+		dbConf = conf.DB
 
-// GetDB get databse connnection
-func GetDB(name ...string) *gorm.DB {
-	if maxIdle == 0 {
 		setDefaultSetting()
-	}
-
-	if len(name) == 0 {
-		return NewDBConnect(defaultConn)
-	}
-
-	return NewDBConnect(name[0])
+		DB = NewDBConnect(defaultConn)
+	})
 }
 
 // NewDBConnect new database connection
@@ -96,10 +85,10 @@ func dbConnect(name string) (*gorm.DB, error) {
 }
 
 func setDefaultSetting() {
-	defaultConn = config.GetString("default")
-	maxIdle = config.GetInt("maxIdle")
-	maxConns = config.GetInt("maxConns")
-	maxLifetime = config.GetDuration("maxLifetime")
+	defaultConn = dbConf.GetString("default")
+	maxIdle = dbConf.GetInt("maxIdle")
+	maxConns = dbConf.GetInt("maxConns")
+	maxLifetime = dbConf.GetDuration("maxLifetime")
 
 	if maxIdle == 0 {
 		maxIdle = defaultMaxIdle
@@ -119,12 +108,12 @@ func setDefaultSetting() {
 }
 
 func getDSN(conn string) string {
-	username := conf.DB.GetString(conn + ".user")
-	password := conf.DB.GetString(conn + ".password")
-	host := conf.DB.GetString(conn + ".host")
-	port := conf.DB.GetString(conn + ".port")
-	charset := conf.DB.GetString(conn + ".charset")
-	dbName := conf.DB.GetString(conn + ".name")
+	username := dbConf.GetString(conn + ".user")
+	password := dbConf.GetString(conn + ".password")
+	host := dbConf.GetString(conn + ".host")
+	port := dbConf.GetString(conn + ".port")
+	charset := dbConf.GetString(conn + ".charset")
+	dbName := dbConf.GetString(conn + ".name")
 
 	return username + ":" + password + "@tcp(" + host + ":" + port + ")/" + dbName + "?charset=" + charset + "&parseTime=True&loc=Local"
 }

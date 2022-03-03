@@ -21,7 +21,6 @@ func Run() {
 	if !ok {
 		env = gin.ReleaseMode
 	}
-
 	gin.SetMode(env)
 
 	app := gin.New()
