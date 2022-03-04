@@ -11,4 +11,6 @@ var (
 	ErrAuthFail = errors.New("auth failed")
 	// ErrTokenIsEmpty token为空
 	ErrTokenIsEmpty = errors.New("token is empty")
+	// ErrTopicNotExists topic不存在
+	ErrTopicNotExists = errors.New("topic not exists")
 )

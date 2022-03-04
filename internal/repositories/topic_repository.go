@@ -70,13 +70,11 @@ func (t *Topic) Exists(ctx context.Context, name string, ignore ...uint64) bool 
 	record := &model.Topic{}
 	db, _ := ctx.Value("db").(*gorm.DB)
 
-	where := "`name` = ?"
 	if len(ignore) > 0 && ignore[0] > 0 {
-		where = "`name` = ? and id != ?"
+		db.Select("id").First(record, "`name` = ? and id != ?", name, ignore[0])
 	} else {
-		ignore = []uint64{0}
+		db.Select("id").First(record, "`name` = ?", name)
 	}
 
-	db.Select("id").First(record, where, name, ignore[0])
 	return record.ID > 0
 }

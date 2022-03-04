@@ -22,4 +22,6 @@ func apiRouter(r *gin.RouterGroup) {
 	r.GET("/topics", api.GetTopics)
 	r.PUT("/topics/:id", api.UpdateTopic)
 	r.DELETE("/topics/:id", api.DeleteTopic)
+	r.POST("/pub", api.Publish)
+	r.POST("/mpub", api.MultiPublish)
 }

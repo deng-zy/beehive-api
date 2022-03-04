@@ -3,10 +3,10 @@ package api
 import (
 	"net/http"
 	"strconv"
-	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gordon-zhiyong/beehive-api/internal/auth"
+	"github.com/gordon-zhiyong/beehive-api/internal/request"
 	"github.com/gordon-zhiyong/beehive-api/internal/service"
 	"github.com/gordon-zhiyong/beehive-api/pkg/conf"
 	"github.com/gordon-zhiyong/beehive-api/pkg/res"
@@ -14,13 +14,14 @@ import (
 
 // CreateClient 创建新的客户端
 func CreateClient(c *gin.Context) {
-	name := strings.Trim(c.PostForm("name"), " ")
-	if len(name) < 1 || name == "" {
+	req := &request.Client{}
+	err := c.ShouldBind(req)
+	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, res.NewJSONError(InvalidParams, ErrInvalidParam))
 		return
 	}
 
-	service.NewClient().Create(name)
+	service.NewClient().Create(req.Name)
 	c.JSON(http.StatusOK, res.JSONSuccess())
 }
 

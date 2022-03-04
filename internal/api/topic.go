@@ -3,9 +3,9 @@ package api
 import (
 	"net/http"
 	"strconv"
-	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gordon-zhiyong/beehive-api/internal/request"
 	"github.com/gordon-zhiyong/beehive-api/internal/service"
 	"github.com/gordon-zhiyong/beehive-api/pkg/res"
 	"github.com/pkg/errors"
@@ -13,13 +13,14 @@ import (
 
 // CreateTopic create topic api
 func CreateTopic(c *gin.Context) {
-	name := strings.TrimSpace(c.PostForm("name"))
-	if name == "" {
+	req := &request.Topic{}
+	err := c.ShouldBind(req)
+	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, res.NewJSONError(InvalidParams, ErrInvalidParam))
 		return
 	}
 
-	err := service.NewTopic().Create(name)
+	err = service.NewTopic().Create(req.Name)
 	if err == nil {
 		c.JSON(http.StatusOK, res.JSONSuccess())
 		return
@@ -35,14 +36,20 @@ func CreateTopic(c *gin.Context) {
 
 // UpdateTopic update topic name
 func UpdateTopic(c *gin.Context) {
-	name := strings.TrimSpace(c.PostForm("name"))
-	id, _ := strconv.ParseUint(c.Param("id"), 10, 64)
-	if name == "" || id == 0 {
+	req := &request.Topic{}
+	err := c.ShouldBind(req)
+	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, res.NewJSONError(InvalidParams, ErrInvalidParam))
 		return
 	}
 
-	err := service.NewTopic().UpdateName(id, name)
+	id, _ := strconv.ParseUint(c.Param("id"), 10, 64)
+	if id < 0 || err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, res.NewJSONError(InvalidParams, ErrInvalidParam))
+		return
+	}
+
+	err = service.NewTopic().UpdateName(id, req.Name)
 	if err == nil {
 		c.JSON(http.StatusOK, res.JSONSuccess())
 		return
