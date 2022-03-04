@@ -3,7 +3,6 @@ package service
 import (
 	"context"
 	"errors"
-	"fmt"
 	"sync"
 
 	"github.com/gordon-zhiyong/beehive-api/internal/model"
@@ -38,13 +37,13 @@ func NewTopic() *Topic {
 // Create create a new topic
 func (t *Topic) Create(name string) error {
 	ctx := context.WithValue(context.TODO(), "db", capsule.DB)
+	if t.repo.Exists(ctx, name) {
+		return ErrTopicAlreadyExists
+	}
+
 	err := t.repo.Create(ctx, name)
 	if err == nil {
 		return nil
-	}
-
-	if errors.Is(err, ErrTopicAlreadyExists) {
-		return ErrTopicAlreadyExists
 	}
 
 	capsule.Logger.WithField("name", name).Errorf("create topic fail. err:%s", err.Error())
@@ -54,15 +53,13 @@ func (t *Topic) Create(name string) error {
 // UpdateName update topic name
 func (t *Topic) UpdateName(ID uint64, name string) error {
 	ctx := context.WithValue(context.TODO(), "db", capsule.DB)
-	err := t.repo.Update(ctx, ID, name)
-	fmt.Println(err)
-
-	if err == nil {
-		return nil
+	if t.repo.Exists(ctx, name, ID) {
+		return ErrTopicAlreadyExists
 	}
 
-	if errors.Is(err, ErrTopicAlreadyExists) {
-		return ErrTopicAlreadyExists
+	err := t.repo.Update(ctx, ID, name)
+	if err == nil {
+		return nil
 	}
 
 	fields := map[string]interface{}{"name": name, "id": ID}
@@ -86,4 +83,10 @@ func (t *Topic) Delete(ID uint64) error {
 func (t *Topic) Get(filters ...Filter) []*model.Topic {
 	ctx := context.WithValue(context.TODO(), "db", capsule.DB)
 	return t.repo.Get(ctx, filters...)
+}
+
+// Exists check topic is exists
+func (t *Topic) Exists(name string) bool {
+	ctx := context.WithValue(context.TODO(), "db", capsule.DB)
+	return t.repo.Exists(ctx, name)
 }

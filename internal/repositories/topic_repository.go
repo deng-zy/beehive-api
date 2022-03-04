@@ -30,13 +30,6 @@ func NewTopic() *Topic {
 // Create create a new topic
 func (t *Topic) Create(ctx context.Context, name string) error {
 	db, _ := ctx.Value("db").(*gorm.DB)
-
-	record := &model.Topic{}
-	db.First(record, "`name` = ?", name)
-	if record.ID > 0 {
-		return ErrTopicAlreadyExists
-	}
-
 	m := &model.Topic{
 		ID:   snowflake.Generate(),
 		Name: name,
@@ -63,18 +56,27 @@ func (t *Topic) Get(ctx context.Context, filters ...Option) []*model.Topic {
 // Update update topic name
 func (t *Topic) Update(ctx context.Context, ID uint64, name string) error {
 	db, _ := ctx.Value("db").(*gorm.DB)
-
-	record := &model.Topic{}
-	db.First(record, "`name` = ? and `id` != ?", name, ID)
-	if record.ID > 0 {
-		return ErrTopicAlreadyExists
-	}
-
-	return db.Model(record).Where("id=?", ID).Update("name", name).Error
+	return db.Model(&model.Topic{}).Where("id=?", ID).Update("name", name).Error
 }
 
 // Delete delete a topic
 func (t *Topic) Delete(ctx context.Context, ID uint64) error {
 	db, _ := ctx.Value("db").(*gorm.DB)
 	return db.Where("id=?", ID).Delete(&model.Topic{}).Error
+}
+
+// Exists check topic is exists
+func (t *Topic) Exists(ctx context.Context, name string, ignore ...uint64) bool {
+	record := &model.Topic{}
+	db, _ := ctx.Value("db").(*gorm.DB)
+
+	where := "`name` = ?"
+	if len(ignore) > 0 && ignore[0] > 0 {
+		where = "`name` = ? and id != ?"
+	} else {
+		ignore = []uint64{0}
+	}
+
+	db.Select("id").First(record, where, name, ignore[0])
+	return record.ID > 0
 }
