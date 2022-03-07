@@ -20,3 +20,13 @@ CREATE TABLE `topics` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `uniq_name` (`name`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE `events` (
+  `id` bigint(20) unsigned NOT NULL COMMENT '数据表主键',
+  `topic` varchar(64) NOT NULL COMMENT 'topic 主题',
+  `payload` varchar(2048) NOT NULL COMMENT '消息',
+  `publisher` varchar(64) NOT NULL COMMENT '发布者',
+  `published_at` datetime DEFAULT NULL COMMENT '发布时间 发布时间可能早于创建时间',
+  `created_at` datetime DEFAULT NULL COMMENT '创建时间',
+  `updated_at` datetime DEFAULT NULL COMMENT '更新时间',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
