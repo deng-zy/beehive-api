@@ -12,5 +12,6 @@
 *.out
 .env
 logs/*.log
+data/*
 # Dependency directories (remove the comment below to include it)
 # vendor/
