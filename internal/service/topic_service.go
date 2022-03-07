@@ -90,3 +90,8 @@ func (t *Topic) Exists(name string) bool {
 	ctx := context.WithValue(context.TODO(), "db", capsule.DB)
 	return t.repo.Exists(ctx, name)
 }
+
+func (t *Topic) ExistsWithMName(names []string) bool {
+	ctx := context.WithValue(context.TODO(), "db", capsule.DB)
+	return t.repo.ExistsWithMName(ctx, name)
+}

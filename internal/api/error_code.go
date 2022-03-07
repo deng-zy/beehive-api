@@ -11,4 +11,10 @@ const (
 	SystemInternalError = 10003
 	// TopicNotExists topic不存在
 	TopicNotExists = 10004
+	// TopicTooLarge topic太多
+	TopicTooLarge = 10005
+	// PayloadTooLarge payload 长度超过限制
+	PayloadTooLarge = 10006
+	// TopicLengthTooLarge topic长度太长
+	TopicLengthTooLarge = 10007
 )

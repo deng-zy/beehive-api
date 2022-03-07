@@ -13,4 +13,10 @@ var (
 	ErrTokenIsEmpty = errors.New("token is empty")
 	// ErrTopicNotExists topic不存在
 	ErrTopicNotExists = errors.New("topic not exists")
+	// ErrTopicTooLarge topic太多
+	ErrTopicTooLarge = errors.New("topic too large(max:100)")
+	// ErrPayloadTooLarge 事件消息太长
+	ErrPayloadTooLarge = errors.New("payload too large(max:2048)")
+	// ErrTopicLengthTooLarge topic长度超过太长
+	ErrTopicLengthTooLarge = errors.New("topic length too large(max:64)")
 )

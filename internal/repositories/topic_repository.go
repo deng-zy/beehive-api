@@ -78,3 +78,13 @@ func (t *Topic) Exists(ctx context.Context, name string, ignore ...uint64) bool 
 
 	return record.ID > 0
 }
+
+// ExistsWithMName check multi topic is exists
+func (t *Topic) ExistsWithMName(ctx context.Context, names []string) bool {
+	actual := len(names)
+	db, _ := ctx.Value("db").(*gorm.DB)
+
+	var except int64
+	db.Model(&model.Topic{}).Where("name in (?)", names).Count(&except)
+	return int64(actual) == except
+}

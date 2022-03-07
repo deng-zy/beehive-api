@@ -1,7 +1,6 @@
 package api
 
 import (
-	"fmt"
 	"net/http"
 	"strings"
 
@@ -28,13 +27,21 @@ func Publish(c *gin.Context) {
 	c.JSON(http.StatusOK, res.JSONSuccess())
 }
 
-// MultiPublish multi event publish api
-func MultiPublish(c *gin.Context) {
-	req := &request.Event{}
+// MPublish public event with multi payload api
+func MPublish(c *gin.Context) {
+	req := &request.MPubReq{}
 	err := c.ShouldBind(req)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, res.NewJSONError(InvalidParams, err))
 		return
+	}
+
+	payloads := strings.Split(req.Payload, "\n")
+	for _, payload := range payloads {
+		if len(payload) > 2048 {
+			c.AbortWithStatusJSON(http.StatusBadRequest, res.NewJSONError(PayloadTooLarge, ErrPayloadTooLarge))
+			return
+		}
 	}
 
 	if !service.NewTopic().Exists(req.Topic) {
@@ -42,13 +49,33 @@ func MultiPublish(c *gin.Context) {
 		return
 	}
 
-	for _, msg := range strings.Split(req.Message, "\n") {
-		m := &request.Event{
-			Topic:   req.Topic,
-			Message: msg,
-		}
-		fmt.Println(m)
+	c.JSON(http.StatusOK, res.JSONSuccess())
+}
+
+// MPubWithMultiTopic public event with multi topic api
+func MPubWithMultiTopic(c *gin.Context) {
+	req := &request.MPubWithTopicReq{}
+	err := c.ShouldBind(req)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, res.NewJSONError(InvalidParams, err))
+		return
 	}
 
-	c.JSON(http.StatusOK, res.JSONSuccess())
+	topics := strings.Split("\n", req.Topic)
+	if len(topics) > 100 {
+		c.AbortWithStatusJSON(http.StatusBadRequest, res.NewJSONError(TopicTooLarge, ErrTopicTooLarge))
+		return
+	}
+
+	for _, topic := range topics {
+		if len(topic) > 64 {
+			c.AbortWithStatusJSON(http.StatusBadRequest, res.NewJSONError(TopicLengthTooLarge, ErrTopicLengthTooLarge))
+			return
+		}
+	}
+
+	if !service.NewTopic().ExistsWithMName(topics) {
+		c.AbortWithStatusJSON(http.StatusBadRequest, res.NewJSONError(TopicNotExists, ErrTopicNotExists))
+		return
+	}
 }
