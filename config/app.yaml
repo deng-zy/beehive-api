@@ -12,6 +12,8 @@ auth:
     - "query:token"
     - "cookie:token"
     - "form:token"
+nsq:
+  address: $NSQ_ADDRESS
 loggers:
   default: beehive
   beehive:

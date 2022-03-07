@@ -1,4 +1,4 @@
-package app
+package box
 
 import (
 	"context"
@@ -6,6 +6,7 @@ import (
 	"sync/atomic"
 
 	"github.com/gordon-zhiyong/beehive-api/internal/model"
+	"github.com/gordon-zhiyong/beehive-api/internal/service"
 	"github.com/pkg/errors"
 )
 
@@ -15,6 +16,7 @@ type Box struct {
 	exit    chan bool
 	channel chan *model.Event
 	ctx     context.Context
+	service *service.Event
 }
 
 var boxOnce sync.Once
@@ -27,7 +29,9 @@ func NewBox(workers int, ctx context.Context) *Box {
 			running: 0,
 			ctx:     ctx,
 			channel: make(chan *model.Event, 4096),
+			service: service.NewEvent(),
 		}
+		service.SetBox(box)
 	})
 	return box
 }
@@ -38,7 +42,7 @@ func (b *Box) Run() {
 	}
 
 	for i := 0; i < b.workers; i++ {
-		go b.bootWorker()
+		go b.work()
 	}
 }
 
@@ -62,7 +66,7 @@ func (b *Box) IsRunning() bool {
 	return b.running == 1
 }
 
-func (b *Box) bootWorker() {
+func (b *Box) work() {
 	defer func() {
 		b.exit <- true
 	}()
