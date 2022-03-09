@@ -12,3 +12,8 @@ type Event struct {
 	CreatedAt   time.Time `gorm:"column:created_at" db:"created_at" json:"created_at" form:"created_at"`         //创建时间
 	UpdatedAt   time.Time `gorm:"column:updated_at" db:"updated_at" json:"updated_at" form:"updated_at"`         //更新时间
 }
+
+// TableName return data table name
+func (e *Event) TableName() string {
+	return "events"
+}

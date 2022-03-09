@@ -10,7 +10,7 @@ type Topic struct {
 	UpdatedAt time.Time `gorm:"column:updated_at" db:"updated_at" json:"updated_at" form:"updated_at"` //更新时间
 }
 
-// TableName return database table name
+// TableName return data table name
 func (t Topic) TableName() string {
 	return "topics"
 }
