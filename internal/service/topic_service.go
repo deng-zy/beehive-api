@@ -91,7 +91,8 @@ func (t *Topic) Exists(name string) bool {
 	return t.repo.Exists(ctx, name)
 }
 
+// ExistsWithMName check multi topic is exists
 func (t *Topic) ExistsWithMName(names []string) bool {
 	ctx := context.WithValue(context.TODO(), "db", capsule.DB)
-	return t.repo.ExistsWithMName(ctx, name)
+	return t.repo.ExistsWithMName(ctx, names)
 }

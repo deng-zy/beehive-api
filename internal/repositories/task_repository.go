@@ -25,14 +25,15 @@ func NewTask() *Task {
 	return task
 }
 
-func (t *Task) Create(ctx context.Context, m *model.Task) {
+// Create create task
+func (t *Task) Create(ctx context.Context, m *model.Event) error {
 	db := ctx.Value("db").(*gorm.DB)
-	t := &model.Task{
+	task := &model.Task{
 		ID:      snowflake.Generate(),
 		EventID: m.ID,
 		Topic:   m.Topic,
 		Payload: m.Payload,
 		Status:  defaultStatus,
 	}
-	db.Create(t)
+	return db.Create(task).Error
 }
