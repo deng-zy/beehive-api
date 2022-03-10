@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gordon-zhiyong/beehive-api/internal/auth"
 	"github.com/gordon-zhiyong/beehive-api/internal/request"
 	"github.com/gordon-zhiyong/beehive-api/internal/service"
 	"github.com/gordon-zhiyong/beehive-api/pkg/res"
@@ -14,6 +15,7 @@ import (
 func Publish(c *gin.Context) {
 	req := &request.Event{}
 	err := c.ShouldBind(req)
+	client, _ := c.MustGet("client").(*auth.ClientAuth)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, res.NewJSONError(InvalidParams, err))
 		return
@@ -24,6 +26,7 @@ func Publish(c *gin.Context) {
 		return
 	}
 
+	service.NewEvent().Publish(req.Topic, req.Payload, client.Name)
 	c.JSON(http.StatusOK, res.JSONSuccess())
 }
 
@@ -31,6 +34,7 @@ func Publish(c *gin.Context) {
 func MPublish(c *gin.Context) {
 	req := &request.MPubReq{}
 	err := c.ShouldBind(req)
+	client, _ := c.MustGet("client").(*auth.ClientAuth)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, res.NewJSONError(InvalidParams, err))
 		return
@@ -49,6 +53,11 @@ func MPublish(c *gin.Context) {
 		return
 	}
 
+	ser := service.NewEvent()
+	for _, payload := range payloads {
+		ser.Publish(req.Topic, payload, client.Name)
+	}
+
 	c.JSON(http.StatusOK, res.JSONSuccess())
 }
 
@@ -56,12 +65,13 @@ func MPublish(c *gin.Context) {
 func MPubWithMultiTopic(c *gin.Context) {
 	req := &request.MPubWithTopicReq{}
 	err := c.ShouldBind(req)
+	client, _ := c.MustGet("client").(*auth.ClientAuth)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, res.NewJSONError(InvalidParams, err))
 		return
 	}
 
-	topics := strings.Split("\n", req.Topic)
+	topics := strings.Split(req.Topic, "\n")
 	if len(topics) > 100 {
 		c.AbortWithStatusJSON(http.StatusBadRequest, res.NewJSONError(TopicTooLarge, ErrTopicTooLarge))
 		return
@@ -78,4 +88,10 @@ func MPubWithMultiTopic(c *gin.Context) {
 		c.AbortWithStatusJSON(http.StatusBadRequest, res.NewJSONError(TopicNotExists, ErrTopicNotExists))
 		return
 	}
+
+	ser := service.NewEvent()
+	for _, topic := range topics {
+		ser.Publish(topic, req.Payload, client.Name)
+	}
+	c.JSON(http.StatusOK, res.JSONSuccess())
 }
